@@ -16,10 +16,10 @@ int findMajorityElement(int nums[], int n)
 }
 
 
-///////////// GCD ////////////
-int gcd(int a, int b)
+///////////// GCD & LCM ////////////
+long long gcd(long long a, long long b)
 {
-    int q, r;
+    long long q, r;
     while (b > 0)
     {
         q = a / b;      // quotient
@@ -27,9 +27,9 @@ int gcd(int a, int b)
         a = b;
         b = r;
     }
- 
     return a;
 }
+long long lcm(int a, int b) { return (a / gcd(a, b)) * b; }
 
 /////////// Is Prime O(n) //////////
 bool isPrime(int n) {
