@@ -154,9 +154,11 @@ return distance[], parent[]
 // pq push startNode
 // while pq not empty:
 //     u = pq extract min
+//     if visited u:
+//         continue
+//     add u to visited
 //     for all u neighbours that have not been visited
 //          add to pq
-//          add to visited
 //          distances[neighbour] = min(distances[neighbour], distanceHere + edge)
 
 /////////////// Monotonic queue (with sliding window) //////////////
