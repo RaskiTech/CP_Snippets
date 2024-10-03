@@ -92,21 +92,41 @@ vector<int> topologicalSort(vector<vector<int> >& adj,
 
 //////////// Linked list cycle detection algorithm /////////////
 // Node not defined here
-bool detectCycle(Node* head)
+void detectCycle(Node* head)
 {
-    Node *slow = head, *fast = head;
- 
-    while (fast && fast->next)
+    if (!head || !head->next)
+        return nullptr;
+    
+    Node* a = head->next;
+    Node* b = head->next->next;
+
+    while (b && b->next && a != b)
     {
-        slow = slow->next;
-        fast = fast->next->next;
- 
-        if (slow == fast) {
-            return true;
-        }
+        a = a->next;
+        b = b->next->next;
     }
- 
-    return false;
+    if (!b || !b->next)
+        return nullptr;
+    
+    // We are in a cycle
+
+    a = head;
+    while (a != b)
+    {
+        a = a->next;
+        b = b->next;
+    }
+    // a is in the position of the first node in the cycle
+
+    int length = 1;
+    b = a->next;
+    while (a != b)
+    {
+        length++;
+        b = b->next;
+    }
+
+    return a;
 }
 
 /////////// Find max subarray sum ////////////
