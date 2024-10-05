@@ -1,0 +1,23 @@
+# Run task
+task $TARGET="template":
+	just --justfile {{justfile()}} execute
+
+
+
+# Don't touch this. This is used as a generic template to compile one file
+# and execute all the tests for it. It reads the task name from an env-variable
+# that is set above.
+
+execute:
+	#!/bin/bash
+	g++ -Wall -DDEBUG ${TARGET}.cpp -o ${TARGET}.o
+	echo $TARGET
+	FILES="./${TARGET}-test-*"
+	for entry in $FILES; do
+		echo "Executing $entry"
+		./${TARGET}.o < $entry
+		sed -n -e '/correct/,$p' $entry
+	done
+
+clean:
+	rm -rf ./*.o
