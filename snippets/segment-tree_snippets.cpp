@@ -1,46 +1,48 @@
-int segment_tree_sum(int a, int b, vector<int> &tree, int n) {
-    a += n; b += n;
-    int s = 0;
-    while (a <= b) {
-        if (a%2 == 1) s += tree[a++];
-        if (b%2 == 0) s += tree[b--];
-        // the following are used for minimum
-        // if (a%2 == 1) s = min(tree[a++], s);
-        // if (b%2 == 0) s = min(tree[b--], s);
-        a /= 2; b /= 2;
+int ST_GetRange(vector<int> &tree, int lowerInclusive, int upperInclusive) {
+    lowerInclusive += tree.size() / 2; upperInclusive += tree.size() / 2;
+    int s = INIT_VAL; // 0 for SumTree and INT_MAX for MinTree
+    while (lowerInclusive <= upperInclusive) {
+        // Sum tree
+        //if (lowerInclusive%2 == 1) s += tree[lowerInclusive++];
+        //if (upperInclusive%2 == 0) s += tree[upperInclusive--];
+        // Min tree
+        if (lowerInclusive%2 == 1) s = min(tree[lowerInclusive++], s);
+        if (upperInclusive%2 == 0) s = min(tree[upperInclusive--], s);
+
+        lowerInclusive /= 2; upperInclusive /= 2;
     }
     return s;
 }
 
-void segment_tree_add(int k, int x, vector<int> &tree, int n) {
-    k += n;
-    tree[k] += x;
-    // tree[k] = x; // if one wants to completely replace a value
-    for (k /= 2; k >= 1; k /= 2) {
-        tree[k] = tree[2*k]+tree[2*k+1];
+void ST_Set(vector<int> &tree, int index, int newVal) {
+    index += tree.size() / 2;
+    
+    //tree[index] += newVal; // For adding
+    tree[index] = newVal; // For setting value
+
+    for (index /= 2; index >= 1; index /= 2) {
+        //tree[index] = tree[2*index]+tree[2*index+1]; // Sum tree
+        tree[index] = min(tree[2*index], tree[2*index+1]); // Min tree
     }
 }
 
-int bit_ceil(int n) {
+// Create segment tree
+vector<int> ST_Create(vector<int> &input, int valueCount) {
     int res = 1;
-    while (res < n) res <<= 1;
-    return res;
-}
+    while (res < valueCount) res <<= 1;
+    vector<int> tree(2 * res, INIT_VAL);
 
-vector<int> create_segment_tree(int n, vector<int> &input, int size) {
-    vector<int> tree(2 * size, 0);
     // Add input to the end
-    for (int i = 0; i < n; i++) {
-        tree[size + i] = input[i];
+    for (int i = 0; i < input.size(); i++) {
+        tree[res + i] = input[i];
     }
 
     // start from the end, from the second last element -> -2
-    for (int i = size * 2 - 2; i > 0; i -= 2) {
-        tree[i/2] = tree[i] + tree[i + 1];
+    for (int i = res * 2 - 2; i > 0; i -= 2) {
+        tree[i/2] = min(tree[i], tree[i + 1]); // Min tree
+        //tree[i/2] = tree[i] + tree[i + 1]); // Sum tree
     }
-
     return tree;
 }
 
-int size = bit_ceil(n);
-vector<int> segment_tree = create_segment_tree(n, input_line, size);
+vector<int> segment_tree = ST_Create(vec, vec.size());
