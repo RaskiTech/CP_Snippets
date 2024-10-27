@@ -35,33 +35,28 @@ def print_dif(out_lines, correct_lines):
     i = 0
     j = 0
     print("Your output:")
-    while i < len(out_lines) and j < len(correct_lines):
+    while i < len(out_lines):
         if out_lines[i].startswith("DEBUG"):
             print(out_lines[i])
-            i = i + 1
-        elif out_lines[i] != correct_lines[j]:
+        elif j < len(correct_lines) and out_lines[i] != correct_lines[j]:
             print(COLOR_YELLOW + out_lines[i] + COLOR_RESET)
-            i = i + 1
             j = j + 1
         else:
             print(out_lines[i])
-            i = i + 1
             j = j + 1
+        i = i + 1
 
     i = 0
     j = 0
     print("Correct output:")
-    while i < len(out_lines) and j < len(correct_lines):
-        if out_lines[i].startswith("DEBUG"):
-            i = i + 1
-        elif out_lines[i] != correct_lines[j]:
+    while j < len(correct_lines):
+        if i < len(out_lines) and out_lines[i] != correct_lines[j]:
             print(COLOR_YELLOW + correct_lines[j] + COLOR_RESET)
-            i = i + 1
             j = j + 1
         else:
             print(correct_lines[j])
-            i = i + 1
             j = j + 1
+        i = i + 1
 
 
 files_ar = []
