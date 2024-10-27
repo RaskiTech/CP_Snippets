@@ -14,6 +14,27 @@ using ll = long long;
 #define deb(fmt, args...)
 #endif
 
+void print_array(vector<int> in, const string title = "Vector")
+{
+	cout << title << " [\n";
+	for (const auto& el : in) {
+		cout << el << " ";
+	}
+	cout << "\n] END\n";
+}
+
+void print_matrix(vector<vector<int>> in, const string title = "Matrix")
+{
+	cout << title << "[\n";
+	for (unsigned int i = 0; i < in.size(); i++) {
+		for (unsigned int j = 0; j < in[i].size(); j++) {
+			cout << in[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	cout << "] END\n";
+}
+
 int main(int argc, char *argv[])
 {
 	// Read the input parameters
