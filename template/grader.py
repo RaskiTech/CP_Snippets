@@ -1,34 +1,3 @@
-"""Simple grader for competitive programming tasks by nuhakala.
-
-Takes name of the task as parameter. Then it does the following:
-- find all files of form "<name>-test-*" in the current working dir
-- run "<name>.o" with every test file as stdin
-- Highlight the difs between correct result and tested executable output
-  with yellow.
-
-Test files are of format:
-    a b
-    c d e f
-    ...
-
-    Output:
-    <correct output>
-
-Everything before line "Output:" is given as input to the executable.
-Everything after "Output:" line is considered as correct answer. Alternatives
-for "Output:" are:
-- "output:"
-- "Correct:"
-- "correct:"
-- "Result:"
-- "result:"
-- "res:"
-
-PROBLEMS with this script:
-- If there are multiple possible correct answers, only the one given in
-  test-file is considered as correct.
-"""
-
 import subprocess
 import sys
 import os
@@ -62,30 +31,37 @@ def get_correct(data):
     return correct
 
 
-def print_dif(out, correct):
-    out_lines = out.splitlines()
-    correct_lines = correct.splitlines()
-    dif = len(out_lines) - len(correct_lines)
-    if dif < 0:
-        for i in range(0, abs(dif)):
-            out_lines.append("")
-    else:
-        for i in range(0, dif):
-            correct_lines.append("")
-
+def print_dif(out_lines, correct_lines):
+    i = 0
+    j = 0
     print("Your output:")
-    for i in range(0, len(out_lines)):
-        if out_lines[i] != correct_lines[i]:
+    while i < len(out_lines) and j < len(correct_lines):
+        if out_lines[i].startswith("DEBUG"):
+            print(out_lines[i])
+            i = i + 1
+        elif out_lines[i] != correct_lines[j]:
             print(COLOR_YELLOW + out_lines[i] + COLOR_RESET)
+            i = i + 1
+            j = j + 1
         else:
             print(out_lines[i])
+            i = i + 1
+            j = j + 1
 
+    i = 0
+    j = 0
     print("Correct output:")
-    for i in range(0, len(correct_lines)):
-        if out_lines[i] != correct_lines[i]:
-            print(COLOR_YELLOW + correct_lines[i] + COLOR_RESET)
+    while i < len(out_lines) and j < len(correct_lines):
+        if out_lines[i].startswith("DEBUG"):
+            i = i + 1
+        elif out_lines[i] != correct_lines[j]:
+            print(COLOR_YELLOW + correct_lines[j] + COLOR_RESET)
+            i = i + 1
+            j = j + 1
         else:
-            print(out_lines[i])
+            print(correct_lines[j])
+            i = i + 1
+            j = j + 1
 
 
 files_ar = []
@@ -99,15 +75,25 @@ passed = 0
 for file in files_ar:
     with open(file, "r") as f:
         data = f.read()
-        out = subprocess.check_output([rootdir + name], input=data.encode())
+        p = subprocess.run(
+            [rootdir + name + ".o"], input=data.encode(), capture_output=True
+        )
+        out = p.stdout
         out = out.decode().strip()
+
+        # Filter debug prints
+        out_lines = out.splitlines()
+        out_filtered = list(filter(lambda x: not x.startswith("DEBUG"), out_lines))
+        out = "\n".join(out_filtered)
+
         correct = get_correct(data).strip()
+        correct_lines = correct.splitlines()
         if out == correct:
             print(COLOR_GREEN + "Test " + file + " passed." + COLOR_RESET)
             passed = passed + 1
         else:
             print(COLOR_RED + "Test " + file + " failed." + COLOR_RESET)
-            print_dif(out, correct)
+            print_dif(out_lines, correct_lines)
             # If you don't want colorful output
             # print("Program output:")
             # print(out)
