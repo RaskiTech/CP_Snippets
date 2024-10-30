@@ -1,3 +1,17 @@
+"""Competitive programming task grader by nuhakala
+
+By default tests compiled programs ending with ".o".
+Requires 1 argument: program name to test without suffix.
+Optionally can test python programs, then give second argument "python".
+
+Examples:
+    python <grader name: grader.py> <program name>
+    python <grader name: grader.py> <program name> python
+
+Supports debug prints of form "DEBUG" and prints the error message
+if the program crashes.
+"""
+
 import subprocess
 import sys
 import os
@@ -59,6 +73,18 @@ def print_dif(out_lines, correct_lines):
         i = i + 1
 
 
+def run_sub_process(data):
+    # Python
+    if len(sys.argv) > 2 and sys.argv[2] == "python":
+        return subprocess.run(
+            ["python", rootdir + name + ".py"], input=data.encode(), capture_output=True
+        )
+    # Base case: c++
+    return subprocess.run(
+        [rootdir + name + ".o"], input=data.encode(), capture_output=True
+    )
+
+
 files_ar = []
 for root, dirs, files in os.walk(rootdir):
     for file in files:
@@ -70,9 +96,13 @@ passed = 0
 for file in files_ar:
     with open(file, "r") as f:
         data = f.read()
-        p = subprocess.run(
-            [rootdir + name + ".o"], input=data.encode(), capture_output=True
-        )
+        p = run_sub_process(data)
+
+        if p.returncode < 0:
+            print(COLOR_RED + "Test failed with following error:" + COLOR_RESET)
+            print(p.stderr.decode())
+            break
+
         out = p.stdout
         out = out.decode().strip()
 
@@ -83,7 +113,7 @@ for file in files_ar:
 
         correct = get_correct(data).strip()
         correct_lines = correct.splitlines()
-        if out == correct:
+        if out.strip() == correct.strip():
             print(COLOR_GREEN + "Test " + file + " passed." + COLOR_RESET)
             passed = passed + 1
         else:
