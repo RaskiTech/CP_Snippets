@@ -1,3 +1,48 @@
+class STree {
+public:
+    vector<int> data;
+    int offset;
+    STree(int size, vector<int>& startVals)
+    {
+        offset = 1;
+        while (size > offset) offset <<= 1;
+        data = vector<int>(2*offset, 0);
+
+        for (int i = 0; i < startVals.size(); i++)
+            data[offset+i] = startVals[i];
+        
+        for (int i = offset-1; i > 0; i--)
+        {
+            data[i] = data[2*i] + data[2*i+1];
+        }
+    }
+
+    void Add(int idx, int val) {Set(idx, data[offset+idx]+val);}
+    void Set(int idx, int val) {
+        idx += offset;
+        data[idx] = val;
+        idx /= 2;
+        while (idx > 0)
+        {
+            data[idx] = data[2*idx] + data[2*idx+1];
+            idx /= 2;
+        }
+    }
+    int Range(int LInc, int RInc) {
+        LInc += offset; RInc += offset;
+        int sum = 0;
+        while (LInc <= RInc)
+        {
+            if (LInc % 2 == 1) sum += data[LInc++];
+            if (RInc % 2 == 0) sum += data[RInc--];
+            LInc /= 2;
+            RInc /= 2;
+        }
+        return sum;
+    }
+};
+
+
 int ST_GetRange(vector<int> &tree, int lowerInclusive, int upperInclusive) {
     lowerInclusive += tree.size() / 2; upperInclusive += tree.size() / 2;
     int s = INIT_VAL; // 0 for SumTree and INT_MAX for MinTree
@@ -13,6 +58,10 @@ int ST_GetRange(vector<int> &tree, int lowerInclusive, int upperInclusive) {
     }
     return s;
 }
+
+////////////////////////////////////////////////////
+//// Another implementation with just functions ////
+////////////////////////////////////////////////////
 
 void ST_Set(vector<int> &tree, int index, int newVal) {
     index += tree.size() / 2;
