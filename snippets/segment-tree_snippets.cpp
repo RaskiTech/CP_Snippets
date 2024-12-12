@@ -42,6 +42,9 @@ public:
     }
 };
 
+////////////////////////////////////////////////////
+//// Another implementation with just functions ////
+////////////////////////////////////////////////////
 
 int ST_GetRange(vector<int> &tree, int lowerInclusive, int upperInclusive) {
     lowerInclusive += tree.size() / 2; upperInclusive += tree.size() / 2;
@@ -59,9 +62,6 @@ int ST_GetRange(vector<int> &tree, int lowerInclusive, int upperInclusive) {
     return s;
 }
 
-////////////////////////////////////////////////////
-//// Another implementation with just functions ////
-////////////////////////////////////////////////////
 
 void ST_Set(vector<int> &tree, int index, int newVal) {
     index += tree.size() / 2;
