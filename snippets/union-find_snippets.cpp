@@ -1,19 +1,27 @@
-for (int i = 1; i <= n; i++) link[i] = i;
-for (int i = 1; i <= n; i++) size[i] = 1;
-
-int find(int x) {
-    while (x != link[x]) x = link[x];
-    return x;
-}
-
-bool same(int a, int b) {
-    return find(a) == find(b);
-}
-
-void unite(int a, int b) {
-    a = find(a);
-    b = find(b);
-    if (size[a] < size[b]) swap(a,b);
-    size[a] += size[b];
-    link[b] = a;
-}
+class UnionFind {
+public:
+    vector<int> data;
+    vector<int> length;
+    int count;
+    UnionFind(int n) : data(vector<int>(n)), length(vector<int>(n, 1)), count(n) {
+        for (int i = 0; i < data.size(); i++)
+            data[i] = i;
+    }
+    int Find(int a) {
+        while (a != data[a])
+            a = data[a];
+        return a;
+    }
+    bool Union(int a, int b) {
+        a = Find(a);
+        b = Find(b);
+        if (a == b)
+            return false;
+        if (length[a] < length[b])
+            swap(a, b);
+        length[a] += length[b];
+        data[b] = a;
+        count--;
+        return true;
+    }
+};
