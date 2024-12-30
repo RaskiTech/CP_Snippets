@@ -42,6 +42,121 @@ public:
     }
 };
 
+
+// Ability to set ranges
+class DynamicSTree {
+public:
+    const int NOT_SET = -1
+    vector<pair<int, int>> data;
+    vector<int> sizes;
+    int offset;
+    DynamicSTree(int size) {
+        offset = 1;
+        while (offset < size) offset <<= 1;
+        data = vector<pair<int, int>>(2*offset, {0, NOT_SET});
+
+        sizes = vector<int>(2*offset);
+        for (int i = offset; i < sizes.size(); i++)
+            sizes[i] = 1;
+        for (int i = offset-1; i > 0; i--)
+            sizes[i] = sizes[2*i] + sizes[2*i+1];
+    }
+
+    void Set(int lInc, int rInc, int value, int offsetIdx = 1)
+    {
+        if (lInc >= sizes[offsetIdx] || rInc < 0)
+            return;
+        if (lInc <= 0 && rInc >= sizes[offsetIdx]-1)
+        {
+            data[offsetIdx] = {sizes[offsetIdx] * value, value};
+            return;
+        }
+
+        PropagateNode(offsetIdx);
+        Set(lInc, min(rInc, sizes[2*offsetIdx]), value, 2*offsetIdx);
+        Set(max<int>(lInc - sizes[2*offsetIdx], 0), rInc - sizes[2*offsetIdx], value, 2*offsetIdx+1);
+        data[offsetIdx] = {data[2*offsetIdx].first + data[2*offsetIdx+1].first, NOT_SET};
+    }
+    void PropagateNode(int offsetIdx)
+    {
+        int value = data[offsetIdx].second;
+        if (value == NOT_SET || offsetIdx >= offset)
+            return;
+        data[2*offsetIdx] = {sizes[2*offsetIdx] * value, value};
+        data[2*offsetIdx+1] = {sizes[2*offsetIdx+1] * value, value};
+        data[offsetIdx].second = NOT_SET;
+    }
+    int Range(int lInc, int rInc, int offsetIdx = 1)
+    {
+        PropagateNode(offsetIdx);
+        if (lInc <= 0 && rInc >= sizes[offsetIdx]-1)
+        {
+            return data[offsetIdx].first;
+        }
+
+        int sum = 0;
+        if (lInc < sizes[2*offsetIdx])
+            sum += Range(lInc, min(rInc, sizes[2*offsetIdx]), 2*offsetIdx);
+        if (rInc >= sizes[2*offsetIdx])
+            sum += Range(max<int>(0, lInc - sizes[2*offsetIdx]), rInc - sizes[2*offsetIdx], 2*offsetIdx+1);
+        return sum;
+    }
+};
+// Ability to add ranges
+class DynamicSTree {
+public:
+    vector<pair<int, int>> data;
+    vector<int> sizes;
+    int offset;
+    DynamicSTree(int size) {
+        offset = 1;
+        while (offset < size) offset <<= 1;
+        data = vector<pair<int, int>>(2*offset, {0, 0});
+
+        sizes = vector<int>(2*offset);
+        for (int i = offset; i < sizes.size(); i++)
+            sizes[i] = 1;
+        for (int i = offset-1; i > 0; i--)
+            sizes[i] = sizes[2*i] + sizes[2*i+1];
+    }
+
+    void Add(int lInc, int rInc, int value, int offsetIdx = 1)
+    {
+        if (lInc >= sizes[offsetIdx] || rInc < 0)
+            return;
+        if (lInc <= 0 && rInc >= sizes[offsetIdx]-1)
+        {
+            data[offsetIdx] = {data[offsetIdx].first + sizes[offsetIdx] * value, data[offsetIdx].second + value};
+            return;
+        }
+
+        PropagateNode(offsetIdx);
+        Add(lInc, min(rInc, sizes[2*offsetIdx]), value, 2*offsetIdx);
+        Add(max<int>(lInc - sizes[2*offsetIdx], 0), rInc - sizes[2*offsetIdx], value, 2*offsetIdx+1);
+        data[offsetIdx] = {data[2*offsetIdx].first + data[2*offsetIdx+1].first, 0};
+    }
+    void PropagateNode(int offsetIdx)
+    {
+        int value = data[offsetIdx].second;
+        if (value == 0 || offsetIdx >= offset)
+            return;
+        data[2*offsetIdx] = {data[2*offsetIdx].first + sizes[2*offsetIdx] * value, data[2*offsetIdx].second + value};
+        data[2*offsetIdx+1] = {data[2*offsetIdx+1].first + sizes[2*offsetIdx+1] * value, data[2*offsetIdx+1].second + value};
+        data[offsetIdx].second = 0;
+    }
+    int Range(int lInc, int rInc, int offsetIdx = 1)
+    {
+        PropagateNode(offsetIdx);
+        if (lInc <= 0 && rInc >= sizes[offsetIdx]-1)
+            return data[offsetIdx].first;
+
+        int sum = 0;
+        if (lInc < sizes[2*offsetIdx]) sum += Range(lInc, min(rInc, sizes[2*offsetIdx]), 2*offsetIdx);
+        if (rInc >= sizes[2*offsetIdx]) sum += Range(max<int>(0, lInc - sizes[2*offsetIdx]), rInc - sizes[2*offsetIdx], 2*offsetIdx+1);
+        return sum;
+    }
+};
+
 ////////////////////////////////////////////////////
 //// Another implementation with just functions ////
 ////////////////////////////////////////////////////
